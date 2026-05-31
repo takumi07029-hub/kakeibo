@@ -143,6 +143,8 @@ body{height:100%;font-family:Meiryo,'Hiragino Kaku Gothic ProN',sans-serif;font-
 .din{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ddt{color:var(--sub);font-size:11px;white-space:nowrap}
 .dam{font-weight:600;white-space:nowrap}
+.dam-refund{color:#34a853}
+.refund-chip{background:#34a853!important;color:#fff!important}
 .chip{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:#e8f0fe;color:var(--primary)}
 .chip.g{background:#e6f4ea;color:var(--success)}
 .stitle{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.06em;text-transform:uppercase;margin:16px 0 8px}
@@ -1229,7 +1231,7 @@ function summarize(txns,husbName){
   var map={};
   for(var i=0;i<txns.length;i++){
     var t=txns[i];
-    if(t.amount<=0)continue;
+    if(t.amount===0)continue;
     var c=t.category||'その他';
     if(!map[c])map[c]={total:0,husband:0,wife:0,items:[]};
     map[c].total+=t.amount;
@@ -1755,7 +1757,7 @@ function renderCat(){
     (function(fc,ci){
       var items=[];
       for(var j=0;j<fc.items.length;j++){
-        var t=fc.items[j];if(t.amount<=0)continue;
+        var t=fc.items[j];if(t.amount===0)continue;
         if(ST.seg==='husband'&&!(t.source==='jcb'||(t.source==='amex'&&t.cardHolder===set.husbandAmexName)))continue;
         if(ST.seg==='wife'&&!(t.source==='amex'&&t.cardHolder!==set.husbandAmexName))continue;
         items.push(t);
@@ -1770,10 +1772,12 @@ function renderCat(){
         (function(t){
           var src=t.source==='jcb'?'JCB':'Amex';
           var editable=ST.catMonth===null;
-          var di=document.createElement('div');di.className='ditem';
+          var isRefund=t.amount<0;
+          var di=document.createElement('div');di.className='ditem'+(isRefund?' refund':'');
+          var amtLabel=isRefund?'<span class="chip refund-chip">払い戻し</span> '+yen(t.amount):yen(t.amount);
           di.innerHTML='<span class="din">'+esc(t.description)+'</span>'
             +'<span class="ddt">'+esc((t.date||'').replace(/\s/g,''))+' <span class="chip">'+src+'</span> <span class="chip'+(editable?' chip-cat':'')+'">'+esc(t.category||'その他')+'</span></span>'
-            +'<span class="dam">'+yen(t.amount)+'</span>';
+            +'<span class="dam'+(isRefund?' dam-refund':'')+'">'+amtLabel+'</span>';
           if(editable){
             var catChip=di.querySelector('.chip-cat');
             if(catChip)(function(txn){

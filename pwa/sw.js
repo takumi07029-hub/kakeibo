@@ -1,4 +1,4 @@
-var CACHE = 'kakeibo-v30';
+var CACHE = 'kakeibo-v31';
 var ASSETS = [
   './index.html',
   './manifest.json',
