@@ -1545,7 +1545,7 @@ function buildKakeiboHistEl(kakeibo){
   wrap.appendChild(title);
   for(var i=0;i<cats.length;i++){
     (function(cat,ci){
-      var items=[];for(var j=0;j<cat.items.length;j++)if(cat.items[j].amount>0)items.push(cat.items[j]);
+      var items=[];for(var j=0;j<cat.items.length;j++)if(cat.items[j].amount!==0)items.push(cat.items[j]);
       if(!items.length)return;
       var sec=document.createElement('div');sec.className='dsec';
       var hdr=document.createElement('div');hdr.className='dhdr';
@@ -1555,10 +1555,12 @@ function buildKakeiboHistEl(kakeibo){
       for(var j=0;j<shown.length;j++){
         var t=shown[j];
         var src=t.source==='jcb'?'JCB':'Amex';
-        var di=document.createElement('div');di.className='ditem';
+        var isRefund=t.amount<0;
+        var di=document.createElement('div');di.className='ditem'+(isRefund?' refund':'');
+        var amtLabel=isRefund?'<span class="chip refund-chip">払い戻し</span> '+yen(t.amount):yen(t.amount);
         di.innerHTML='<span class="din">'+esc(t.description)+'</span>'
           +'<span class="ddt">'+esc((t.date||'').replace(/\s/g,''))+' <span class="chip">'+src+'</span> <span class="chip">'+esc(t.category||'その他')+'</span></span>'
-          +'<span class="dam">'+yen(t.amount)+'</span>';
+          +'<span class="dam'+(isRefund?' dam-refund':'')+'">'+amtLabel+'</span>';
         dl.appendChild(di);
       }
       hdr.addEventListener('click',function(){hdr.classList.toggle('op');dl.classList.toggle('op');});
