@@ -951,7 +951,7 @@ function updateWdTotal(){
 
 function initBonus(){
   var newBtn=el('btn-new-bonus');
-  if(newBtn)newBtn.addEventListener('click',openNewBonusModal);
+  if(newBtn)newBtn.addEventListener('click',function(){openNewBonusModal();});
   var nbAdd=el('nb-add-alloc');
   if(nbAdd)nbAdd.addEventListener('click',function(){_nbAllocs.push({name:'',amount:0,isSavings:false});renderNbAllocs();});
   var nbCancel=el('nb-cancel');
