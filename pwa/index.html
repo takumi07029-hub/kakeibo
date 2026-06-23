@@ -579,7 +579,7 @@ body{height:100%;font-family:Meiryo,'Hiragino Kaku Gothic ProN',sans-serif;font-
 <!-- ボーナス新規作成モーダル -->
 <div class="moverlay" id="newbonus-modal">
   <div class="msheet">
-    <h2>ボーナスを追加</h2>
+    <h2 id="nb-modal-title">ボーナスを追加</h2>
     <div class="field">
       <label>ラベル（例: 2025年冬）</label>
       <input type="text" id="nb-label" placeholder="2025年冬">
@@ -709,6 +709,9 @@ function buildBonusCard(bonus){
   var wbtn=document.createElement('button');wbtn.className='btn btns';wbtn.style.cssText='margin-top:8px;width:100%';wbtn.textContent='+ 引き出しを記録';
   (function(bid){wbtn.addEventListener('click',function(){openWithdrawalModal(bid);});})(bonus.id);
   wdiv.appendChild(wbtn);
+  var ebtn=document.createElement('button');ebtn.className='bdelbtn';ebtn.style.background='var(--primary)';ebtn.textContent='このボーナスを編集';
+  (function(bid){ebtn.addEventListener('click',function(){openNewBonusModal(bid);});})(bonus.id);
+  wdiv.appendChild(ebtn);
   var dbtn=document.createElement('button');dbtn.className='bdelbtn';dbtn.textContent='このボーナスを削除';
   (function(bid){
     dbtn.addEventListener('click',function(){
@@ -820,13 +823,24 @@ function buildWithdrawalItem(bonus,w){
 }
 
 var _nbAllocs=[];
+var _nbEditId=null;
 var _wdBonusId=null;
 var _wdEditId=null;
 
-function openNewBonusModal(){
-  _nbAllocs=[{name:'',amount:0,isSavings:false}];
-  var inp=el('nb-label');if(inp)inp.value='';
-  var tot=el('nb-total');if(tot)tot.value='';
+function openNewBonusModal(bonusId){
+  _nbEditId=bonusId||null;
+  var existing=null;
+  if(_nbEditId){
+    var arr=getBonuses();
+    for(var i=0;i<arr.length;i++)if(arr[i].id===_nbEditId){existing=arr[i];break;}
+  }
+  _nbAllocs=existing
+    ?existing.allocations.map(function(a){return{name:a.name,amount:a.amount,isSavings:!!a.isSavings};})
+    :[{name:'',amount:0,isSavings:false}];
+  var inp=el('nb-label');if(inp)inp.value=existing?existing.label:'';
+  var tot=el('nb-total');if(tot)tot.value=existing?existing.total:'';
+  var title=el('nb-modal-title');if(title)title.textContent=existing?'ボーナスを編集':'ボーナスを追加';
+  var okBtn=el('nb-ok');if(okBtn)okBtn.textContent=existing?'更新':'作成';
   renderNbAllocs();
   var mo=el('newbonus-modal');if(mo)mo.classList.add('op');
 }
@@ -953,10 +967,17 @@ function initBonus(){
     var validAllocs=[];
     for(var i=0;i<_nbAllocs.length;i++)if((_nbAllocs[i].name||'').trim())validAllocs.push({name:_nbAllocs[i].name.trim(),amount:_nbAllocs[i].amount||0,isSavings:!!_nbAllocs[i].isSavings});
     if(!validAllocs.length){toast('使い道を1つ以上入力してください',true);return;}
-    var b={id:'b_'+Date.now(),label:label,total:total,allocations:validAllocs,withdrawals:[]};
-    var arr=getBonuses();arr.unshift(b);saveBonuses(arr);
+    var arr=getBonuses();
+    if(_nbEditId){
+      for(var i=0;i<arr.length;i++){
+        if(arr[i].id===_nbEditId){arr[i].label=label;arr[i].total=total;arr[i].allocations=validAllocs;break;}
+      }
+    } else {
+      arr.unshift({id:'b_'+Date.now(),label:label,total:total,allocations:validAllocs,withdrawals:[]});
+    }
+    saveBonuses(arr);
     var mo=el('newbonus-modal');if(mo)mo.classList.remove('op');
-    renderBonusList();toast('ボーナスを追加しました');
+    renderBonusList();toast(_nbEditId?'更新しました':'ボーナスを追加しました');
   });
   var wdYm=el('wd-ym');
   if(wdYm)wdYm.addEventListener('change',function(){
