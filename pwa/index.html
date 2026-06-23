@@ -709,7 +709,7 @@ function buildBonusCard(bonus){
   var wbtn=document.createElement('button');wbtn.className='btn btns';wbtn.style.cssText='margin-top:8px;width:100%';wbtn.textContent='+ 引き出しを記録';
   (function(bid){wbtn.addEventListener('click',function(){openWithdrawalModal(bid);});})(bonus.id);
   wdiv.appendChild(wbtn);
-  var ebtn=document.createElement('button');ebtn.className='bdelbtn';ebtn.style.background='var(--primary)';ebtn.textContent='このボーナスを編集';
+  var ebtn=document.createElement('button');ebtn.className='bdelbtn';ebtn.textContent='このボーナスを編集';
   (function(bid){ebtn.addEventListener('click',function(){openNewBonusModal(bid);});})(bonus.id);
   wdiv.appendChild(ebtn);
   var dbtn=document.createElement('button');dbtn.className='bdelbtn';dbtn.textContent='このボーナスを削除';
